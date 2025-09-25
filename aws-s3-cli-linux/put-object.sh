@@ -1,18 +1,29 @@
 #!/usr/bin/env bash
 
-#lets create output directory if it doesn't exist
-mkdir -p $OUTPUT_DIR
+echo "===========Put Object to S3 Bucket============"
 
-#generate random number
+#exit immediately if a command exits with a non-zero status
+set -e
+ 
+#check for bucket name
+if [ -z "$1" ]; then
+  echo "Bucket name not provided"
+  exit 1
+fi
+BUCKET_NAME=$1
+#check for file name
+if [ -z "$2" ]; then
+    echo "File name not provided"
+    exit 1
+fi
+FILE_NAME=$2
 
-NUM_FILES=$((RANDOM % 10 + 1))
+OBJECT_KEY=$(basename "$FILE_NAME")
 
-for((i=1; i<=NUM_FILES; i++)); do
-#generate a random file name
-FILE_NAME="OUTPUT_DIR/File_$i.txt"
+#upload file to s3 bucket
+aws s3api put-object \
+    --bucket "$BUCKET_NAME" \
+    --key "$OBJECT_KEY" \
+    --body "$FILE_NAME"
 
-#generate random data and write to file
-
-dd if=/dev/urandom of=$FILE_NAME bs=1024 count=$((RANDOM % 1024 + 1)) 2> /dev/null
-
-done
+echo "===========Put Object to S3 Bucket Completed============"
